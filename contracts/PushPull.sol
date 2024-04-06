@@ -30,6 +30,7 @@ contract PushPull is Initializable, OwnableUpgradeable {
     function initialize(IERC20Upgradeable _token) public initializer {
         __Ownable_init();
         token = _token;
+        setAdmin(msg.sender, true);
     }
 
     function toOffChain(uint256 amount) public {
