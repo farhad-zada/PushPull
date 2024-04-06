@@ -8,6 +8,7 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 error InsufficientAllowance();
 error TransferFail();
 error InsufficientBalance();
+error OnlyAdmin();
 
 contract PushPull is Initializable, OwnableUpgradeable {
     uint256 public totalOffChain;
@@ -17,7 +18,7 @@ contract PushPull is Initializable, OwnableUpgradeable {
     mapping(address => bool) public admins;
 
     modifier onlyAdmin() {
-        require(admins[msg.sender], "PushPull: only admin");
+        if (!admins[msg.sender]) revert OnlyAdmin();
         _;
     }
 
