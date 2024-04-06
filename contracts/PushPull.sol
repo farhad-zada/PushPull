@@ -11,6 +11,8 @@ error InsufficientBalance();
 error OnlyAdmin();
 
 contract PushPull is Initializable, OwnableUpgradeable {
+    uint256 public lastOffId;
+    uint256 public lastOnId;
     uint256 public totalOffChain;
     uint256 public totalOnChain;
     IERC20Upgradeable public token;
@@ -22,8 +24,18 @@ contract PushPull is Initializable, OwnableUpgradeable {
         _;
     }
 
-    event OffChain(address indexed to, uint256 amount, uint256 timestamp);
-    event OnChain(address indexed to, uint256 amount, uint256 timestamp);
+    event OffChain(
+        address indexed to,
+        uint256 id,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event OnChain(
+        address indexed to,
+        uint256 id,
+        uint256 amount,
+        uint256 timestamp
+    );
     event Admin(address indexed admin, bool status);
     event RenounceAdmin(address indexed admin);
     event Withdraw(address indexed to, uint256 amount, uint256 timestamp);
@@ -40,7 +52,8 @@ contract PushPull is Initializable, OwnableUpgradeable {
         bool success = token.transferFrom(msg.sender, address(this), amount);
         if (!success) revert TransferFail();
         totalOffChain += amount;
-        emit OffChain(msg.sender, amount, block.timestamp);
+        lastOffId++;
+        emit OffChain(msg.sender, lastOffId, amount, block.timestamp);
     }
 
     function toOnChain(
@@ -50,7 +63,8 @@ contract PushPull is Initializable, OwnableUpgradeable {
         success = token.transfer(to, amount);
         if (!success) revert TransferFail();
         totalOnChain += amount;
-        emit OnChain(to, amount, block.timestamp);
+        lastOnId++;
+        emit OnChain(to, amount, lastOnId, block.timestamp);
     }
 
     function setToken(address _token) public onlyOwner {
