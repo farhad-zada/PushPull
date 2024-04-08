@@ -1,6 +1,7 @@
 const { ethers, waffle, upgrades } = require("hardhat");
 const { expect } = require("chai");
 const { parseEther } = ethers;
+const withdraw = require("./pushPull.withdraw.test");
 
 describe("PushPull", function () {
   let PushPull;
@@ -98,4 +99,6 @@ describe("PushPull", function () {
     await pushPull.connect(addr1).renounceAdmin();
     expect(await pushPull.admins(addr1)).to.be.false;
   });
+
+  describe.only("Withdraw", withdraw);
 });
