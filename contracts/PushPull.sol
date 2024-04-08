@@ -98,4 +98,6 @@ contract PushPull is Initializable, OwnableUpgradeable {
         }
         emit Withdraw(to, amount, block.timestamp);
     }
+
+    receive() external payable {}
 }
