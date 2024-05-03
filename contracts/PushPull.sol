@@ -5,9 +5,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-error InsufficientAllowance();
-error TransferFail();
-error InsufficientBalance();
 error OnlyAdmin();
 
 contract PushPull is Initializable, OwnableUpgradeable {
@@ -24,18 +21,8 @@ contract PushPull is Initializable, OwnableUpgradeable {
         _;
     }
 
-    event OffChain(
-        address indexed to,
-        uint256 id,
-        uint256 amount,
-        uint256 timestamp
-    );
-    event OnChain(
-        address indexed to,
-        uint256 id,
-        uint256 amount,
-        uint256 timestamp
-    );
+    event OffChain(address indexed to, uint256 id, uint256 amount);
+    event OnChain(address indexed to, uint256 id, uint256 amount);
     event Admin(address indexed admin, bool status);
     event RenounceAdmin(address indexed admin);
     event Withdraw(address indexed to, uint256 amount, uint256 timestamp);
@@ -46,14 +33,11 @@ contract PushPull is Initializable, OwnableUpgradeable {
         setAdmin(msg.sender, true);
     }
 
-    function toOffChain(uint256 amount) public {
-        uint256 totalApproved = token.allowance(msg.sender, address(this));
-        if (totalApproved < amount) revert InsufficientAllowance();
-        bool success = token.transferFrom(msg.sender, address(this), amount);
-        if (!success) revert TransferFail();
+    function toOffChain(uint256 amount) public returns (bool success) {
+        success = token.transferFrom(msg.sender, address(this), amount);
         totalOffChain += amount;
         lastOffId++;
-        emit OffChain(msg.sender, lastOffId, amount, block.timestamp);
+        emit OffChain(msg.sender, lastOffId, amount);
     }
 
     function toOnChain(
@@ -61,10 +45,9 @@ contract PushPull is Initializable, OwnableUpgradeable {
         uint256 amount
     ) public onlyAdmin returns (bool success) {
         success = token.transfer(to, amount);
-        if (!success) revert TransferFail();
         totalOnChain += amount;
         lastOnId++;
-        emit OnChain(to, amount, lastOnId, block.timestamp);
+        emit OnChain(to, amount, lastOnId);
     }
 
     function setToken(address _token) public onlyOwner {
@@ -87,14 +70,9 @@ contract PushPull is Initializable, OwnableUpgradeable {
         uint256 amount
     ) public payable onlyOwner returns (bool success) {
         if (_token == address(0)) {
-            if (amount > address(this).balance) revert InsufficientBalance();
             (success, ) = to.call{value: amount}("");
-            if (!success) revert TransferFail();
         } else {
-            if (amount > IERC20Upgradeable(_token).balanceOf(address(this)))
-                revert InsufficientBalance();
             success = IERC20Upgradeable(_token).transfer(to, amount);
-            if (!success) revert TransferFail();
         }
         emit Withdraw(to, amount, block.timestamp);
     }

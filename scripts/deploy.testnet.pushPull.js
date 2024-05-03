@@ -1,5 +1,8 @@
 const { ethers, upgrades } = require("hardhat");
 require("dotenv").config();
+const fs = require("fs");
+
+fs.writeFileSync();
 
 const TEST_TOKEN = process.env.TEST_TOKEN;
 async function main() {

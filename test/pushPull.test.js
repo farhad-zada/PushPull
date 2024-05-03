@@ -17,6 +17,7 @@ describe("PushPull", function () {
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
     Token = await ethers.getContractFactory("Token");
+
     token = await upgrades.deployProxy(Token, {
       initializer: "initialize",
       kind: "transparent",
@@ -60,9 +61,8 @@ describe("PushPull", function () {
   });
 
   it("without allowance cannot pull from chain", async function () {
-    await expect(
-      pushPull.connect(addr1).toOffChain(parseEther("100"))
-    ).to.be.revertedWithCustomError(PushPull, "InsufficientAllowance");
+    await expect(pushPull.connect(addr1).toOffChain(parseEther("100"))).to.be
+      .reverted;
   });
 
   it("anyone with token can pull from chain", async function () {
@@ -100,5 +100,24 @@ describe("PushPull", function () {
     expect(await pushPull.admins(addr1)).to.be.false;
   });
 
-  describe.only("Withdraw", withdraw);
+  it("penetrate pushPull", async function () {
+    await token.approve(pushPull.target, parseEther("1000000"));
+    for (let i = 0; i < 100; i++) {
+      await pushPull.toOnChain(addr1, parseEther("736"));
+      await pushPull.toOnChain(addr1, parseEther("1000"));
+      await pushPull.toOnChain(addr1, parseEther("2737"));
+      await pushPull.toOnChain(addr1, parseEther("2"));
+      await pushPull.toOnChain(addr1, parseEther("736"));
+      await pushPull.toOnChain(addr1, parseEther("76"));
+      await pushPull.toOnChain(addr1, parseEther("36"));
+      await pushPull.toOnChain(addr1, parseEther("6"));
+
+      await pushPull.toOffChain(parseEther("736"));
+      await pushPull.toOffChain(parseEther("1000"));
+    }
+    // console.log(await pushPull.totalOnChain());
+    // console.log(await pushPull.totalOffChain());
+  });
+
+  describe("Withdraw", withdraw);
 });
