@@ -14,7 +14,7 @@ module.exports = {
       url: process.env.BSC_RPC,
       chainId: process.env.BSC_CID * 1,
       accounts: [process.env.PKEY],
-      timeout: 60000,
+      // timeout: 60000,
       // pollingInterval: 10000,
       // gasPrice: 40_000_000_000,
     },
@@ -24,7 +24,7 @@ module.exports = {
       accounts: [process.env.PKEY],
       timeout: 60000,
       // pollingInterval: 10000,
-      gasPrice: 40_000_000_000,
+      // gasPrice: 40_000_000_000,
     },
     pol: {
       url: process.env.POL_RPC,

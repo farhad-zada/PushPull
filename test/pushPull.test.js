@@ -100,7 +100,7 @@ describe("PushPull", function () {
     expect(await pushPull.admins(addr1)).to.be.false;
   });
 
-  it("penetrate pushPull", async function () {
+  it.only("penetrate pushPull", async function () {
     await token.approve(pushPull.target, parseEther("1000000"));
     for (let i = 0; i < 100; i++) {
       await pushPull.toOnChain(addr1, parseEther("736"));

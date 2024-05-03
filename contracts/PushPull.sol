@@ -10,8 +10,6 @@ error OnlyAdmin();
 contract PushPull is Initializable, OwnableUpgradeable {
     uint256 public lastOffId;
     uint256 public lastOnId;
-    uint256 public totalOffChain;
-    uint256 public totalOnChain;
     IERC20Upgradeable public token;
 
     mapping(address => bool) public admins;
@@ -35,7 +33,6 @@ contract PushPull is Initializable, OwnableUpgradeable {
 
     function toOffChain(uint256 amount) public returns (bool success) {
         success = token.transferFrom(msg.sender, address(this), amount);
-        totalOffChain += amount;
         lastOffId++;
         emit OffChain(msg.sender, lastOffId, amount);
     }
@@ -45,7 +42,6 @@ contract PushPull is Initializable, OwnableUpgradeable {
         uint256 amount
     ) public onlyAdmin returns (bool success) {
         success = token.transfer(to, amount);
-        totalOnChain += amount;
         lastOnId++;
         emit OnChain(to, amount, lastOnId);
     }
